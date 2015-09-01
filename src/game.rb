@@ -1,9 +1,9 @@
 require 'board'
 
 class Game < Gosu::Window
-  DEFAULT_WIDTH = 800
-  DEFAULT_HEIGHT = 640
-  DEFAULT_TILE_SIZE = 32
+  DEFAULT_WIDTH = 1280
+  DEFAULT_HEIGHT = 768
+  DEFAULT_TILE_SIZE = 64
 
   attr_accessor :board
 
@@ -20,15 +20,15 @@ class Game < Gosu::Window
   end
 
   def draw
-    (@height / 32).times do |h|
-      (@width / 32).times do |w|
-        @tile.draw(32 * w, 32 * h, 0, 0.13, 0.13)
+    (@height / DEFAULT_TILE_SIZE).times do |h|
+      (@width / DEFAULT_TILE_SIZE).times do |w|
+        @tile.draw(DEFAULT_TILE_SIZE * w, DEFAULT_TILE_SIZE * h, 0, 0.256, 0.256)
       end
     end
   end
 
   def generate_level
-    Array.new((@width / 32) * (@height / 32), 1)
+    Array.new((@width / DEFAULT_TILE_SIZE) * (@height / DEFAULT_TILE_SIZE), 1)
   end
 
   def needs_cursor?; true; end
