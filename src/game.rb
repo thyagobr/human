@@ -7,12 +7,14 @@ class Game < Gosu::Window
 
   attr_accessor :board
 
-  def initialize(width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT)
+  def initialize(width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT, load_screen: true)
     @board = Board.new
     @width, @height = width, height
-    super(@width, @height, fullscreen = false)
-    @tile = Gosu::Image.new(self, "tileset_floor.png", true, (250 * 5) + 10, (250 * 2) + 10, 240, 240)
-    self.caption = "human"
+    if load_screen
+      super(@width, @height, fullscreen = false)
+      @tile = Gosu::Image.new(self, "tileset_floor.png", true, (250 * 5) + 10, (250 * 2) + 10, 240, 240)
+      self.caption = "human"
+    end
   end
 
   def update

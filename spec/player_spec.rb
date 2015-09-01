@@ -8,7 +8,7 @@ RSpec.describe Player do
     let(:player) { Player.new }
 
     it "is only valid with coords" do
-      
+      expect(player.pos).to eql [0,0]
     end
 
   end

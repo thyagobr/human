@@ -2,19 +2,17 @@ require 'game'
 require 'player'
 
 class Board
-  TILE_SIZE = 32
-
   attr_accessor :tileset, :tiles_width, :tiles_height, :players
 
   def initialize(params = nil)
-    @tiles_width = 800 / TILE_SIZE
-    @tiles_height = 600 / TILE_SIZE
+    @tiles_width = Game::DEFAULT_WIDTH / Game::DEFAULT_TILE_SIZE
+    @tiles_height = Game::DEFAULT_HEIGHT / Game::DEFAULT_TILE_SIZE
     @tileset = Array.new(@tiles_width * @tiles_height)
     @players = Array.new
   end
 
   def fetch_by_coords(x, y)
-    @tileset[(x / TILE_SIZE) * (y / TILE_SIZE)]
+    @tileset[(x / Game::DEFAULT_TILE_SIZE) * (y / Game::DEFAULT_TILE_SIZE)]
   end
 
   def add_player(player)

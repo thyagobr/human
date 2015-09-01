@@ -4,7 +4,7 @@ require 'board'
 RSpec.describe Board do
 
   before do
-    @game = Game.new
+    @game = Game.new(load_screen: false)
   end
 
   subject { @game.board }
@@ -12,18 +12,19 @@ RSpec.describe Board do
   context "when creating a new Board on a new game" do
     it { is_expected.to be_an_instance_of Board }
 
-    it "is 800x600 with 32px tiles by default" do
-      expect(@game.board.tiles_width).to eql (800 / 32)
-      expect(@game.board.tiles_height).to eql (600 / 32)
-      expect(@game.board.tileset.size).to eql ((800 / 32) * (600 / 32))
+    its(:tiles_width) { is_expected.to eql (Game::DEFAULT_WIDTH / Game::DEFAULT_TILE_SIZE) }
+    its(:tiles_height) { is_expected.to eql (Game::DEFAULT_HEIGHT / Game::DEFAULT_TILE_SIZE) }
+    its("tileset.size") do
+      is_expected.to eql ((Game::DEFAULT_WIDTH / Game::DEFAULT_TILE_SIZE) * (Game::DEFAULT_HEIGHT / Game::DEFAULT_TILE_SIZE))
     end
+
   end
 
   describe "#fetch_by_coords" do
     it "fetches the tileset index representing given map coordinates" do
       @game.board.tileset[54] = Tile.new
       content_by_coords = @game.board.fetch_by_coords(300, 200)
-      expect(content_by_coords).to eql @game.board.tileset[(300/32) * (200/32)]
+      expect(content_by_coords).to eql @game.board.tileset[(300 / Game::DEFAULT_TILE_SIZE) * (200 / Game::DEFAULT_TILE_SIZE)]
     end
   end
 
@@ -32,14 +33,10 @@ RSpec.describe Board do
       @game.board.add_player Player.new
     end
 
-    let(:player) { @game.board.players.first }
-    
-    subject { player }
+    subject { @game.board.players.first }
 
     it { is_expected.to be_an_instance_of Player }
 
-    it "puts new players at the first tile by default" do
-      expect(player.pos).to eql [0, 0]
-    end
+    its(:pos) { is_expected.to eql [0, 0] }
   end
 end
