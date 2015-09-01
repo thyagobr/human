@@ -28,9 +28,18 @@ RSpec.describe Board do
   end
 
   describe "#add_player" do
-    it "may contain players" do
+    before do
       @game.board.add_player Player.new
-      @game.board.players.first.must_be_instance_of Player
+    end
+
+    let(:player) { @game.board.players.first }
+    
+    subject { player }
+
+    it { is_expected.to be_an_instance_of Player }
+
+    it "puts new players at the first tile by default" do
+      expect(player.pos).to eql [0, 0]
     end
   end
 end
