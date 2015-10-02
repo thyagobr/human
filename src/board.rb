@@ -19,12 +19,16 @@ class Board
     @players << player
   end
 
+  def player
+    @players.first
+  end
+
+  def render
+    @players.first.draw if @players.first
+  end
+
 end
 
 class Tile
   # may contain many sprites for transparency composition
-end
-
-class Player
-
 end
