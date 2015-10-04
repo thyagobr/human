@@ -1,3 +1,4 @@
+require 'byebug'
 require 'board'
 
 class Game < Gosu::Window
@@ -8,13 +9,14 @@ class Game < Gosu::Window
   attr_accessor :board
 
   def initialize(width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT, load_screen: true)
-    @board = Board.new
+    @board = Board.new(tile: @tile)
     @width, @height = width, height
     if load_screen
       super(@width, @height, fullscreen = false)
-      @tile = Gosu::Image.new(self, "tileset_floor.png", true, (250 * 5) + 10, (250 * 2) + 10, 240, 240)
       self.caption = "human"
       @board.add_player Player.new(window: self)
+      @tile = Gosu::Image.new(self, "tileset_floor.png", true, (250 * 5) + 10, (250 * 2) + 10, 240, 240)
+      @board.tile = @tile
     end
     @visibility = { fog: 3 }
   end
@@ -40,7 +42,7 @@ class Game < Gosu::Window
       (@width / DEFAULT_TILE_SIZE).times do |w|
         #zero = (250 * 5) + 10
         #@tile = Gosu::Image.new(self, "tileset_floor.png", true, zero, zero, 240, 240)
-        @tile.draw(DEFAULT_TILE_SIZE * w, DEFAULT_TILE_SIZE * h, 0, 0.256, 0.256) if in_player_view(@board.player, w, h)
+        @board.draw_map(DEFAULT_TILE_SIZE * w, DEFAULT_TILE_SIZE * h, 0, 0.256, 0.256) if in_player_view(@board.player, w, h) 
       end
     end
 
