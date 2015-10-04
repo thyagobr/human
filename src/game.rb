@@ -16,6 +16,7 @@ class Game < Gosu::Window
       self.caption = "human"
       @board.add_player Player.new(window: self)
     end
+    @visibility = { fog: 3 }
   end
 
   def update
@@ -39,7 +40,7 @@ class Game < Gosu::Window
       (@width / DEFAULT_TILE_SIZE).times do |w|
         #zero = (250 * 5) + 10
         #@tile = Gosu::Image.new(self, "tileset_floor.png", true, zero, zero, 240, 240)
-        @tile.draw(DEFAULT_TILE_SIZE * w, DEFAULT_TILE_SIZE * h, 0, 0.256, 0.256)
+        @tile.draw(DEFAULT_TILE_SIZE * w, DEFAULT_TILE_SIZE * h, 0, 0.256, 0.256) if in_player_view(@board.player, w, h)
       end
     end
 
@@ -49,6 +50,15 @@ class Game < Gosu::Window
   def generate_level
     Array.new(((@width / DEFAULT_TILE_SIZE) * (@height / DEFAULT_TILE_SIZE)) * 2, 1)
   end
+
+  def in_player_view(player, w, h)
+    terrain_visibility = @visibility[:fog] * DEFAULT_TILE_SIZE
+      (player.x - terrain_visibility) <= (DEFAULT_TILE_SIZE * w) and
+      (player.x + terrain_visibility) >= (DEFAULT_TILE_SIZE * w) and
+      (player.y - terrain_visibility) <= (DEFAULT_TILE_SIZE * h) and
+      (player.y + terrain_visibility) >= (DEFAULT_TILE_SIZE * h)
+  end
+
 
   def needs_cursor?; true; end
 
