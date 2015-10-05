@@ -24,15 +24,19 @@ class Game < Gosu::Window
   def update
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
       @board.player.left
+      @board.pos_x -= 1 unless @board.pos_x == 0
     end
     if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
       @board.player.right
+      @board.pos_x += 1
     end
     if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
       @board.player.up
+      @board.pos_y += 1
     end
     if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
       @board.player.down
+      @board.pos_y -= 1
     end
   end
 

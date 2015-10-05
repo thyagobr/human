@@ -2,7 +2,7 @@ require 'game'
 require 'player'
 
 class Board
-  attr_accessor :tileset, :tiles_width, :tiles_height, :players, :tile
+  attr_accessor :tileset, :tiles_width, :tiles_height, :players, :tile, :pos_x, :pos_y
 
   def initialize(params = nil)
     @tiles_width = Game::DEFAULT_WIDTH / Game::DEFAULT_TILE_SIZE
@@ -16,7 +16,7 @@ class Board
   def fetch_by_coords(x, y)
     #@tileset[(x / Game::DEFAULT_TILE_SIZE) * (y / Game::DEFAULT_TILE_SIZE)]
     local_x = (x / Game::DEFAULT_TILE_SIZE) + @pos_x
-    local_y = (y / Game::DEFAULT_TILE_SIZE)
+    local_y = (y / Game::DEFAULT_TILE_SIZE) + @pos_y
     # 3 times here, 'cuz I set the map to be 3 * DEFAULT_WIDTH manually on irb
     @tileset[local_x + (local_y * ((3 * Game::DEFAULT_WIDTH) / Game::DEFAULT_TILE_SIZE))]
   end

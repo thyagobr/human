@@ -38,16 +38,16 @@ class Player
     case direction
     when 0
       @pos = 36
-      @y -= @vel
+      #@y -= @vel
     when 1
       @pos = 0
-      @y += @vel
+      #@y += @vel
     when 2
       @pos = 12
-      @x -= @vel
+      #@x -= @vel
     when 3
       @pos = 24
-      @x += @vel
+      #@x += @vel
     end 
     @anim = Gosu::milliseconds / 100 % 3
   end
