@@ -38,7 +38,6 @@ class Board
   end
 
   def draw_map(x, y, z, scale_x, scale_y)
-    puts "tpos: #{fetch_by_coords(x, y)}, x: #{x}, y: #{y}"
     case fetch_by_coords(x, y)
     when 1 then @tile.draw(x, y, 0, 0.256, 0.256)
     when 2 then 

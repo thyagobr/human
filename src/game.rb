@@ -18,25 +18,25 @@ class Game < Gosu::Window
       @tile = Gosu::Image.new(self, "tileset_floor.png", true, (250 * 5) + 10, (250 * 2) + 10, 240, 240)
       @board.tile = @tile
     end
-    @visibility = { fog: 3 }
+    @visibility = { fog: 30 }
   end
 
   def update
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
       @board.player.left
-      @board.pos_x -= 1 unless @board.pos_x == 0
+      @board.pos_x -= 1 unless @board.pos_x <= 0
     end
     if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
       @board.player.right
-      @board.pos_x += 1
+      @board.pos_x += 1 unless @board.pos_x >= (@width / DEFAULT_TILE_SIZE)
     end
     if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
       @board.player.up
-      @board.pos_y += 1
+      @board.pos_y += 1 unless @board.pos_y >= (@height / DEFAULT_TILE_SIZE)
     end
     if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
       @board.player.down
-      @board.pos_y -= 1
+      @board.pos_y -= 1 unless @board.pos_y <= 0
     end
   end
 
