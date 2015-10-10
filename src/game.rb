@@ -9,6 +9,7 @@ class Game < Gosu::Window
   attr_accessor :board
 
   def initialize(width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT, load_screen: true)
+    # represents a container for maps and player units
     @board = Board.new(tile: @tile)
     @width, @height = width, height
     if load_screen
