@@ -57,6 +57,22 @@ class Main < Gosu::Window
     end
   end
   if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
+      # if the player x is above the middle of the screen, allow it to move back
+      if @board.player.y > ((SCREEN_Y / 2) - 32 - 1)
+        @board.player.up(move: true)
+      else
+        # otherwise, update the player image, without moving it
+        @board.player.up
+        # if there's more room to move the camera to the left, move it
+        if @board.camera.y >= 5 
+          @board.camera.y -= 5
+        else
+          # if the camera is already at the left limit, move the player if it's not on wall too
+          @board.player.up(move: true) if @board.camera.y <= 0 and @board.player.y > 0
+        end
+      end
+    # in case of collision before player.x reaches 0?
+    # better let the player's movement algorithm decide
     @board.player.up
     @board.camera.y -= 5 unless @board.camera.y <= 0
   end
@@ -182,8 +198,8 @@ class Player
   def pos_x; @x + 64; end
   def pos_y; @y + 64; end
 
-  def up; move(0); end
-  def down; move(1); end
+  def up(move: false); move(0, move: move); end
+  def down(move: false); move(1, move: move); end
   def left(move: false); move(2, move: move); end
   def right(move: false); move(3, move: move); end
 
@@ -191,10 +207,10 @@ class Player
     case direction
     when 0
       @pos = 36
-      #@y -= @vel
+      @y -= @vel if move
     when 1
       @pos = 0
-      #@y += @vel
+      @y += @vel if move
     when 2
       @pos = 12
       @x -= @vel if move
