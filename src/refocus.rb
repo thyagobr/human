@@ -12,25 +12,39 @@ class Main < Gosu::Window
 		@board = Board.new(self)
 	end
 
+  def width
+    @board.map
+  end
+
 	def draw
 		@board.draw_map
 	end
 
   def update
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
-     #@board.player.left
+      # in case of collision before player.x reaches 0?
+      # better let the player's movement algorithm decide
+      move_player = (@board.camera.x <= 0 and @board.player.x > 0)
+      @board.player.left(move: move_player)
       @board.camera.x -= 5 unless @board.camera.x <= 0
     end
     if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
-     #@board.player.right
-      @board.camera.x += 5 #unless @board.camera.x >= (DEFAULT_WIDTH / TILE_SIZE)
+      # this means: player x must be lower than half the screen size minus half player size
+      if @board.player.x < ((DEFAULT_WIDTH / 2) - 32)
+        @board.player.right(move: true)
+      else
+        #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
+        @board.player.right
+        # this must be set to the maximum size of the board
+        @board.camera.x += 5 unless @board.camera.x >= @board.map_x * TILE_SIZE
+      end
     end
     if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
-     #@board.player.up
+      @board.player.up
       @board.camera.y -= 5 unless @board.camera.y <= 0
     end
     if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
-     #@board.player.down
+      @board.player.down
       @board.camera.y += 5 #unless @board.camera.y >= (DEFAULT_HEIGHT / TILE_SIZE)
     end
   end
@@ -39,11 +53,12 @@ end
 
 class Board
 
-	attr_accessor :window, :camera
+	attr_accessor :window, :camera, :player
 
 	def initialize(window)
     @camera = Camera.new(0, 0)
 		@window = window
+    @player = Player.new(window: window)
 		@dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
 		@light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
     @map = [
@@ -76,12 +91,19 @@ class Board
       end
 		end
 	end
+
+  # this will be a method belonging to future Map class
+  def map_dimensions
+    # [width, height], in array-size
+    [@map[0].size, @map.size]
+  end
+  def map_x; map_dimensions[0]; end
+  def map_y; map_dimensions[1]; end
   
   private
 
 	def render
-    @width = @map[0].size
-    @height = @map.size
+    @width, @height = map_dimensions
 
     @map.each_with_index do |row,y|
       row.each_with_index do |tile,x|
@@ -89,35 +111,14 @@ class Board
       end
     end
 
-#		@map.each_with_index do |tile,index|
-#      x, y = to_2d_coords(index)
-#      yield tile, x, y if in_camera_view(x, y)
-#		end
+    @player.draw
+
 	end
 
   def in_camera_view(x, y)
     (@camera.x + (Main::DEFAULT_WIDTH / Main::TILE_SIZE) <= x) and
       (@camera.y + (Main::DEFAULT_WIDTH / Main::TILE_SIZE) <= y)
   end
-
-	def to_2d_coords(index)
-    # [x, y]
-    # the x is the modulus of the index with the width
-    # the y is the division of the index widh the width
-    # so, where is index @map[42]?
-    # x = 42 % (1720 / 32) = 42 % 40 = 2
-    # y = 42 / (1720 / 32) = 42 / 40 = 1
-    # so it's on the second line (y=1), third column (x=2)
-    # (yes, it begins with 0)
-		[(index % (Main::DEFAULT_WIDTH / Main::TILE_SIZE)), (index / (Main::DEFAULT_WIDTH / Main::TILE_SIZE))]
-	end
-
-	def fetch_coords(x, y)
-		# x + y * width
-		# but the width is in pixels, and we're moving in array positions
-		# so, we have (Main::DEFAULT_WIDTH / Main::TILE_SIZE) array width
-		@map[x + (y * (Main::DEFAULT_WIDTH / Main::TILE_SIZE))]
-	end
 
 end
 
@@ -132,6 +133,61 @@ class Camera
   def initialize(x, y)
     @x, @y = x, y
   end
+end
+
+class Player
+  attr_accessor :x, :y, :poses
+
+  def initialize(x: 0, y: 0, coords_system: :tiles, window: nil) 
+    @x, @y = [(Main::DEFAULT_WIDTH / 2) - 32, (Main::DEFAULT_HEIGHT / 2) - 32]
+    @vel = 3
+    @pos = 0
+    @anim = 0
+    @score = 0
+    if window
+      @window = window
+      @poses = Gosu::Image.load_tiles(window, "crisiscorepeeps.png", 32, 32, true)
+    end
+  end
+
+  def pos
+    [@x, @y]
+  end
+
+  def draw
+    @poses[@pos + @anim].draw(@x, @y, 1, 1.5, 1.5)
+  end
+
+  def warp(x, y)
+    @x, @y = x, y
+  end
+
+  def pos_x; @x + 64; end
+  def pos_y; @y + 64; end
+
+  def up; move(0); end
+  def down; move(1); end
+  def left(move: false); move(2, move: move); end
+  def right(move: false); move(3, move: move); end
+
+  def move(direction, move: false)
+    case direction
+    when 0
+      @pos = 36
+      #@y -= @vel
+    when 1
+      @pos = 0
+      #@y += @vel
+    when 2
+      @pos = 12
+      @x -= @vel if move
+    when 3
+      @pos = 24
+      @x += @vel if move
+    end 
+    @anim = Gosu::milliseconds / 100 % 3
+  end
+
 end
 
 Main.new.show
