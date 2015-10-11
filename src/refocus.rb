@@ -36,51 +36,51 @@ class Main < Gosu::Window
           @board.player.left(move: true) if @board.camera.x <= 0 and @board.player.x > 0
         end
       end
-    # in case of collision before player.x reaches 0?
-    # better let the player's movement algorithm decide
-  end
-  if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
-    # this means: player x must be lower than half the screen size minus half player size
-    if @board.player.x < ((SCREEN_X / 2) - 32 - 1)
-      @board.player.right(move: true)
-    else
-      #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
-      #@board.camera.x >= (@board.map_x * TILE_SIZE)jjjjj
-      @board.player.right
-      # this must be set to the maximum size of the board
-      if @board.camera.x + SCREEN_X <= @board.map_x * TILE_SIZE
-        @board.camera.x += 5
+      # in case of collision before player.x reaches 0?
+      # better let the player's movement algorithm decide
+    end
+    if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
+      # this means: player x must be lower than half the screen size minus half player size
+      if @board.player.x < ((SCREEN_X / 2) - 32 - 1)
+        @board.player.right(move: true)
       else
-        # move the player until he hits the wall
-        @board.player.right(move: true) if @board.player.x <= SCREEN_X - 64
+        #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
+        #@board.camera.x >= (@board.map_x * TILE_SIZE)jjjjj
+        @board.player.right
+        # this must be set to the maximum size of the board
+        if @board.camera.x + SCREEN_X <= @board.map_x * TILE_SIZE
+          @board.camera.x += 5
+        else
+          # move the player until he hits the wall
+          @board.player.right(move: true) if @board.player.x <= SCREEN_X - 64
+        end
       end
     end
-  end
-  if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
-      # if the player x is above the middle of the screen, allow it to move back
+    if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
       if @board.player.y > ((SCREEN_Y / 2) - 32 - 1)
         @board.player.up(move: true)
       else
-        # otherwise, update the player image, without moving it
         @board.player.up
-        # if there's more room to move the camera to the left, move it
         if @board.camera.y >= 5 
           @board.camera.y -= 5
         else
-          # if the camera is already at the left limit, move the player if it's not on wall too
           @board.player.up(move: true) if @board.camera.y <= 0 and @board.player.y > 0
         end
       end
-    # in case of collision before player.x reaches 0?
-    # better let the player's movement algorithm decide
-    @board.player.up
-    @board.camera.y -= 5 unless @board.camera.y <= 0
+    end
+    if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
+      if @board.player.y < ((SCREEN_Y / 2) - 32 - 1)
+        @board.player.down(move: true)
+      else
+        @board.player.down
+        if @board.camera.y + SCREEN_Y <= @board.map_y * TILE_SIZE
+          @board.camera.y += 5
+        else
+          @board.player.down(move: true) if @board.player.y <= SCREEN_Y - 64
+        end
+      end
+    end
   end
-  if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
-    @board.player.down
-    @board.camera.y += 5 #unless @board.camera.y >= (SCREEN_Y / TILE_SIZE)
-  end
-end
 
 end
 
