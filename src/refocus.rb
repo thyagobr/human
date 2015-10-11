@@ -3,64 +3,81 @@ require 'byebug'
 
 class Main < Gosu::Window
 
-	DEFAULT_WIDTH = 1280
-	DEFAULT_HEIGHT = 720
-	TILE_SIZE = 64
+  SCREEN_X = 1280
+  SCREEN_Y = 720
+  TILE_SIZE = 64
 
-	def initialize
-		super(1280, 720, fullscreen = false)
-		@board = Board.new(self)
-	end
+  def initialize
+    super(1280, 720, fullscreen = false)
+    @board = Board.new(self)
+  end
 
   def width
     @board.map
   end
 
-	def draw
-		@board.draw_map
-	end
+  def draw
+    @board.draw_map
+  end
 
   def update
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
-      # in case of collision before player.x reaches 0?
-      # better let the player's movement algorithm decide
-      move_player = (@board.camera.x <= 0 and @board.player.x > 0)
-      @board.player.left(move: move_player)
-      @board.camera.x -= 5 unless @board.camera.x <= 0
-    end
-    if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
-      # this means: player x must be lower than half the screen size minus half player size
-      if @board.player.x < ((DEFAULT_WIDTH / 2) - 32)
-        @board.player.right(move: true)
+      # if the player x is above the middle of the screen, allow it to move back
+      if @board.player.x > ((SCREEN_X / 2) - 32 - 1)
+        @board.player.left(move: true)
       else
-        #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
-        @board.player.right
-        # this must be set to the maximum size of the board
-        @board.camera.x += 5 unless @board.camera.x >= @board.map_x * TILE_SIZE
+        # otherwise, update the player image, without moving it
+        @board.player.left
+        # if there's more room to move the camera to the left, move it
+        if @board.camera.x >= 5 
+          @board.camera.x -= 5
+        else
+          # if the camera is already at the left limit, move the player if it's not on wall too
+          @board.player.left(move: true) if @board.camera.x <= 0 and @board.player.x > 0
+        end
+      end
+    # in case of collision before player.x reaches 0?
+    # better let the player's movement algorithm decide
+  end
+  if button_down? Gosu::KbRight or button_down? Gosu::GpRight then
+    # this means: player x must be lower than half the screen size minus half player size
+    if @board.player.x < ((SCREEN_X / 2) - 32 - 1)
+      @board.player.right(move: true)
+    else
+      #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
+      #@board.camera.x >= (@board.map_x * TILE_SIZE)jjjjj
+      @board.player.right
+      # this must be set to the maximum size of the board
+      if @board.camera.x + SCREEN_X <= @board.map_x * TILE_SIZE
+        @board.camera.x += 5
+      else
+        # move the player until he hits the wall
+        @board.player.right(move: true) if @board.player.x <= SCREEN_X - 64
       end
     end
-    if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
-      @board.player.up
-      @board.camera.y -= 5 unless @board.camera.y <= 0
-    end
-    if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
-      @board.player.down
-      @board.camera.y += 5 #unless @board.camera.y >= (DEFAULT_HEIGHT / TILE_SIZE)
-    end
   end
+  if button_down? Gosu::KbUp or button_down? Gosu::GpButton0 then
+    @board.player.up
+    @board.camera.y -= 5 unless @board.camera.y <= 0
+  end
+  if button_down? Gosu::KbDown or button_down? Gosu::GpButton1 then
+    @board.player.down
+    @board.camera.y += 5 #unless @board.camera.y >= (SCREEN_Y / TILE_SIZE)
+  end
+end
 
 end
 
 class Board
 
-	attr_accessor :window, :camera, :player
+  attr_accessor :window, :camera, :player
 
-	def initialize(window)
+  def initialize(window)
     @camera = Camera.new(0, 0)
-		@window = window
+    @window = window
     @player = Player.new(window: window)
-		@dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
-		@light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
+    @dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
+    @light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
     @map = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
@@ -89,8 +106,8 @@ class Board
       when Tile::LIGHT_GRASS then
         @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       end
-		end
-	end
+    end
+  end
 
   # this will be a method belonging to future Map class
   def map_dimensions
@@ -99,10 +116,10 @@ class Board
   end
   def map_x; map_dimensions[0]; end
   def map_y; map_dimensions[1]; end
-  
+
   private
 
-	def render
+  def render
     @width, @height = map_dimensions
 
     @map.each_with_index do |row,y|
@@ -113,11 +130,11 @@ class Board
 
     @player.draw
 
-	end
+  end
 
   def in_camera_view(x, y)
-    (@camera.x + (Main::DEFAULT_WIDTH / Main::TILE_SIZE) <= x) and
-      (@camera.y + (Main::DEFAULT_WIDTH / Main::TILE_SIZE) <= y)
+    (@camera.x + (Main::SCREEN_X / Main::TILE_SIZE) <= x) and
+      (@camera.y + (Main::SCREEN_X / Main::TILE_SIZE) <= y)
   end
 
 end
@@ -139,7 +156,7 @@ class Player
   attr_accessor :x, :y, :poses
 
   def initialize(x: 0, y: 0, coords_system: :tiles, window: nil) 
-    @x, @y = [(Main::DEFAULT_WIDTH / 2) - 32, (Main::DEFAULT_HEIGHT / 2) - 32]
+    @x, @y = [(Main::SCREEN_X / 2) - 32, (Main::SCREEN_Y / 2) - 32]
     @vel = 3
     @pos = 0
     @anim = 0
