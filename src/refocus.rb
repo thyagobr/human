@@ -21,6 +21,9 @@ class Main < Gosu::Window
   end
 
   def update
+    if button_down? Gosu::KbQ
+      puts "player_x: #{@board.player.x}, player_y: #{@board.player.y}"
+    end
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
       # if the player x is above the middle of the screen, allow it to move back
       if @board.player.x > ((SCREEN_X / 2) - 32 - 1)
@@ -45,7 +48,7 @@ class Main < Gosu::Window
         @board.player.right(move: true)
       else
         #move_player = (@board.camera.x >= 0 (@board.map_x / TILE_SIZE)and @board.player.x > 0)
-        #@board.camera.x >= (@board.map_x * TILE_SIZE)jjjjj
+        #@board.camera.x >= (@board.map_x * TILE_SIZE)
         @board.player.right
         # this must be set to the maximum size of the board
         if @board.camera.x + SCREEN_X <= @board.map_x * TILE_SIZE
@@ -94,6 +97,7 @@ class Board
     @player = Player.new(window: window)
     @dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
     @light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
+    @dead_tree_trunk = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 192, 32, 64)
     @map = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
@@ -104,7 +108,7 @@ class Board
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -116,11 +120,13 @@ class Board
 
   def draw_map
     render do |tile, x, y|
+      # default ground
+      @dark_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       case tile
-      when Tile::DARK_GRASS then
-        @dark_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       when Tile::LIGHT_GRASS then
         @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
+      when Tile::DEAD_TREE_TRUNK then
+        @dead_tree_trunk.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       end
     end
   end
@@ -158,6 +164,7 @@ end
 class Tile
   DARK_GRASS = 0
   LIGHT_GRASS = 1
+  DEAD_TREE_TRUNK = 2
 end
 
 class Camera
