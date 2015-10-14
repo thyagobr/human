@@ -119,9 +119,15 @@ class Board
   end
 
   def draw_map
+    # this works, but it draws weird...i'd rather not do that
+    (Main::SCREEN_X / Main::TILE_SIZE).times do |x|
+      (Main::SCREEN_Y / Main::TILE_SIZE).times do |y|
+        @dark_grass.draw(x * Main::TILE_SIZE, y * Main::TILE_SIZE, 0, 2, 2)
+      end
+    end
+
     render do |tile, x, y|
       # default ground
-      @dark_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       case tile
       when Tile::LIGHT_GRASS then
         @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
