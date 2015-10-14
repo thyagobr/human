@@ -97,7 +97,8 @@ class Board
     @player = Player.new(window: window)
     @dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
     @light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
-    @dead_tree_trunk = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 192, 32, 64)
+    @dead_tree_trunk_0 = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 224, 32, 32)
+    @dead_tree_trunk_1 = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 192, 32, 32)
     @map = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
@@ -109,7 +110,7 @@ class Board
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -125,8 +126,10 @@ class Board
       case tile
       when Tile::LIGHT_GRASS then
         @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
-      when Tile::DEAD_TREE_TRUNK then
-        @dead_tree_trunk.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
+      when Tile::DEAD_TREE_TRUNK_0 then
+        @dead_tree_trunk_0.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
+      when Tile::DEAD_TREE_TRUNK_1 then
+        @dead_tree_trunk_1.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
       end
     end
   end
@@ -164,7 +167,8 @@ end
 class Tile
   DARK_GRASS = 0
   LIGHT_GRASS = 1
-  DEAD_TREE_TRUNK = 2
+  DEAD_TREE_TRUNK_1 = 2
+  DEAD_TREE_TRUNK_0 = 3
 end
 
 class Camera
