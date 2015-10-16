@@ -21,8 +21,12 @@ class Main < Gosu::Window
   end
 
   def update
+    if button_down? Gosu::KbF
+      @board.player.skill(:tree_cut) if in_bounds?(@board.player, [Tile::DEAD_TREE_TRUNK_0])
+    end
     if button_down? Gosu::KbQ
       puts "player_x: #{@board.player.x}, player_y: #{@board.player.y}"
+      puts "fetch_by_coords: #{@board.fetch_by_coords(@board.player.x, @board.player.y)}"
     end
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
       # if the player x is above the middle of the screen, allow it to move back
@@ -141,6 +145,10 @@ class Board
   end
   def map_x; map_dimensions[0]; end
   def map_y; map_dimensions[1]; end
+
+  def fetch_by_coords(x, y)
+    @map[((y + @camera.y) / Main::TILE_SIZE)][((x + @camera.x) / Main::TILE_SIZE)]
+  end
 
   private
 
