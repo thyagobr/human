@@ -20,10 +20,13 @@ class Main < Gosu::Window
     @board.draw_map
   end
 
-  def update
-    if button_down? Gosu::KbF
+  def button_down(id)
+    if id == Gosu::KbF
       @board.player.skill(:tree_cut) if in_bounds?(@board.player, [Tile::DEAD_TREE_TRUNK_0])
     end
+  end
+
+  def update
     if button_down? Gosu::KbQ
       puts "player_x: #{@board.player.x}, player_y: #{@board.player.y}"
       puts "fetch_by_coords: #{@board.fetch_by_coords(@board.player.x, @board.player.y)}"
@@ -89,6 +92,10 @@ class Main < Gosu::Window
     end
   end
 
+  def in_bounds?(player, entities)
+    @board.check_bounds(player, entities)
+  end
+
 end
 
 class Board
@@ -146,8 +153,19 @@ class Board
   def map_x; map_dimensions[0]; end
   def map_y; map_dimensions[1]; end
 
+  # ToDo: sort out this x, y -> y, x mess
   def fetch_by_coords(x, y)
     @map[((y + @camera.y) / Main::TILE_SIZE)][((x + @camera.x) / Main::TILE_SIZE)]
+  end
+
+  def check_bounds(player, entities)
+    square = []
+    square << fetch_by_coords(player.x, player.y)
+    square << fetch_by_coords(player.x + Main::TILE_SIZE, player.y)
+    square << fetch_by_coords(player.x - Main::TILE_SIZE, player.y)
+    square << fetch_by_coords(player.x, player.y + Main::TILE_SIZE)
+    square << fetch_by_coords(player.x, player.y - Main::TILE_SIZE)
+    square.include? entities.first
   end
 
   private
@@ -187,7 +205,16 @@ class Camera
   end
 end
 
+module Skill
+  def skill(skill)
+    case skill
+    when :tree_cut then puts "cutting tree"
+    end
+  end
+end
+
 class Player
+  include Skill
   attr_accessor :x, :y, :poses
 
   def initialize(x: 0, y: 0, coords_system: :tiles, window: nil) 
