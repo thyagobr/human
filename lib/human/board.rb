@@ -56,6 +56,10 @@ class Board
   def fetch_by_coords(x, y)
     @map[((y + @camera.y) / Main::TILE_SIZE)][((x + @camera.x) / Main::TILE_SIZE)]
   end
+  
+  def set_by_coords(x, y, value)
+    @map[((y + @camera.y) / Main::TILE_SIZE)][((x + @camera.x) / Main::TILE_SIZE)] = value
+  end
 
   def check_bounds(player, entities)
     positions_matrix = [

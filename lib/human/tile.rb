@@ -22,7 +22,12 @@ class Tile
   def depleted?; @depleted; end
 
   def draw(x, y)
-    @image.draw(x, y, 0, 2, 2)
+    # ToDo: normalize image sizes
+    unless @type == :fire
+      @image.draw(x, y, 0, 2, 2)
+    else
+      @image.draw(x, y, 0, 1, 1)
+    end
   end
 
 end

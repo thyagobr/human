@@ -20,6 +20,20 @@ module Skill
         index = @board.player.inventory.index { |item| item.type == :wood }
         if index
           item = @board.player.inventory.delete_at(index)
+          coord_x = pos_x
+          coord_y = pos_y
+          case @facing
+          when :up
+            coord_y -= 32
+          when :down
+            coord_y += 32
+          when :left
+            coord_x -= 32
+          when :right
+            coord_x += 32
+          end
+          fire = Tile.new(@window, "fire.png", 0, 0, 64, 64, :fire)
+          @board.set_by_coords(coord_x, coord_y, fire)
           puts "fire success!"
         else
           puts "you don't have wood!"
