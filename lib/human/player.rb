@@ -1,6 +1,6 @@
 class Player
   include Skill
-  attr_accessor :x, :y, :poses, :inventory
+  attr_accessor :x, :y, :poses, :inventory, :facing
 
   def initialize(x: 0, y: 0, coords_system: :tiles, window: nil, board: nil) 
     @board = board
@@ -8,6 +8,7 @@ class Player
     @x, @y = [(Main::SCREEN_X / 2) - 32, (Main::SCREEN_Y / 2) - 32]
     @tree_cut = 5
     @make_fire = 7
+    @facing = :down
     @vel = 3
     @pos = 0
     @anim = 0
@@ -33,10 +34,10 @@ class Player
   def pos_x; @x + 64; end
   def pos_y; @y + 64; end
 
-  def up(move: false); move(0, move: move); end
-  def down(move: false); move(1, move: move); end
-  def left(move: false); move(2, move: move); end
-  def right(move: false); move(3, move: move); end
+  def up(move: false); @facing = :up; move(0, move: move); end
+  def down(move: false); @facing = :down; move(1, move: move); end
+  def left(move: false); @facing = :left; move(2, move: move); end
+  def right(move: false); @facing = :right;  move(3, move: move); end
 
   def move(direction, move: false)
     case direction
