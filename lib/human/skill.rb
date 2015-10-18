@@ -20,8 +20,8 @@ module Skill
         index = @board.player.inventory.index { |item| item.type == :wood }
         if index
           item = @board.player.inventory.delete_at(index)
-          coord_x = pos_x
-          coord_y = pos_y
+          coord_x = @x
+          coord_y = @y
           case @facing
           when :up
             coord_y -= 32
