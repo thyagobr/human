@@ -1,14 +1,19 @@
-require 'spec_helper'
-require 'player'
+require 'refocus'
 
 RSpec.describe Player do
 
-  context "when creating a new Player" do
+  context "A new Player" do
 
     let(:player) { Player.new }
 
-    it "is only valid with coords" do
-      expect(player.pos).to eql [0,0]
+    it "has an empty inventory" do
+      expect(player.inventory).to be_empty
+    end
+
+    it "may add items to the inventory" do
+      item = Item.new(:wood)
+      player.add_to_inventory item
+      expect(player.inventory).to include item
     end
 
   end

@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 #
 HUMAN_ROOT = File.expand_path('../../', __FILE__)
-$:.unshift("#{HUMAN_ROOT}/src")
+$:.unshift("#{HUMAN_ROOT}/lib")
+$:.unshift("#{HUMAN_ROOT}/lib/human")
 
 require 'gosu'
-require 'game'
+require 'human'
 
-game = Game.new.show
+game = Main.new.show
