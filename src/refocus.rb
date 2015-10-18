@@ -22,7 +22,11 @@ class Main < Gosu::Window
 
   def button_down(id)
     if id == Gosu::KbF
-      @board.player.skill(:tree_cut) if in_bounds?(@board.player, [Tile::DEAD_TREE_TRUNK_0])
+      if bounds = in_bounds?(@board.player, [:dead_tree_trunk_1])
+        @board.player.skill(:tree_cut, 7, bounds)
+      elsif bounds = in_bounds?(@board.player, [:dead_tree_trunk_0])
+        @board.player.skill(:tree_cut, 7, bounds) 
+      end
     end
   end
 
@@ -30,6 +34,7 @@ class Main < Gosu::Window
     if button_down? Gosu::KbQ
       puts "player_x: #{@board.player.x}, player_y: #{@board.player.y}"
       puts "fetch_by_coords: #{@board.fetch_by_coords(@board.player.x, @board.player.y)}"
+      puts "#{@board.map_depleted}"
     end
     if button_down? Gosu::KbLeft or button_down? Gosu::GpLeft then
       # if the player x is above the middle of the screen, allow it to move back
@@ -100,17 +105,18 @@ end
 
 class Board
 
-  attr_accessor :window, :camera, :player
+  attr_accessor :window, :camera, :player, :map_depleted
 
   def initialize(window)
     @camera = Camera.new(0, 0)
     @window = window
-    @player = Player.new(window: window)
-    @dark_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 384, 0, 32, 32)
-    @light_grass = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 640, 0, 32, 32)
-    @dead_tree_trunk_0 = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 224, 32, 32)
-    @dead_tree_trunk_1 = Gosu::Image.new(@window, "hyptosis_tile-art-batch-1.png", true, 448, 192, 32, 32)
-    @map = [
+    @player = Player.new(window: window, board: self)
+    @dark_grass = Tile.new(@window, "hyptosis_tile-art-batch-1.png", 384, 0, 32, 32, :dark_grass)
+    @light_grass = Tile.new(@window, "hyptosis_tile-art-batch-1.png", 640, 0, 32, 32, :light_grass)
+    @dead_tree_trunk_0 = Tile.new(@window, "hyptosis_tile-art-batch-1.png", 448, 224, 32, 32, :dead_tree_trunk_0)
+    @dead_tree_trunk_1 = Tile.new(@window, "hyptosis_tile-art-batch-1.png", 448, 192, 32, 32, :dead_tree_trunk_1)
+    # its @map[y][x] - first we get the rows, which correspond to y; then, the units along the x
+    @map_sketch = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -128,20 +134,28 @@ class Board
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
+    @map = @map_sketch.map do |row|
+      row.map do |int|
+        instance_variable_get("@#{Tile::TILES[int]}").dup
+      end
+    end
   end
 
   def draw_map
     render do |tile, x, y|
       # default ground
-      @dark_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
-      case tile
-      when Tile::LIGHT_GRASS then
-        @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
-      when Tile::DEAD_TREE_TRUNK_0 then
-        @dead_tree_trunk_0.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
-      when Tile::DEAD_TREE_TRUNK_1 then
-        @dead_tree_trunk_1.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y, 0, 2, 2)
-      end
+      @dark_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y)
+      tile.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y) if not tile.depleted?
+      #      case tile
+      #      when Tile::LIGHT_GRASS then
+      #        @light_grass.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y)
+      #      when Tile::DEAD_TREE_TRUNK_0 then
+      #        unless resource_depleted?(tile, x, y)
+      #          @dead_tree_trunk_0.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y)
+      #        end
+      #      when Tile::DEAD_TREE_TRUNK_1 then
+      #        @dead_tree_trunk_1.draw(x * Main::TILE_SIZE - @camera.x, y * Main::TILE_SIZE - @camera.y)
+      #      end
     end
   end
 
@@ -159,13 +173,21 @@ class Board
   end
 
   def check_bounds(player, entities)
-    square = []
-    square << fetch_by_coords(player.x, player.y)
-    square << fetch_by_coords(player.x + Main::TILE_SIZE, player.y)
-    square << fetch_by_coords(player.x - Main::TILE_SIZE, player.y)
-    square << fetch_by_coords(player.x, player.y + Main::TILE_SIZE)
-    square << fetch_by_coords(player.x, player.y - Main::TILE_SIZE)
-    square.include? entities.first
+    positions_matrix = [
+      [player.x, player.y],
+      [player.x + Main::TILE_SIZE, player.y],
+      [player.x - Main::TILE_SIZE, player.y],
+      [player.x, player.y + Main::TILE_SIZE],
+      [player.x, player.y - Main::TILE_SIZE],
+    ]
+
+    positions_matrix.each do |pos|
+      if fetch_by_coords(*pos).type == entities.first
+        return pos
+      end
+    end
+
+    false
   end
 
   private
@@ -183,6 +205,10 @@ class Board
 
   end
 
+  def resource_depleted?(tile, x, y)
+    @map_depleted[y] and @map_depleted[y][x] and @map_depleted[y][x].include?(tile)
+  end
+
   def in_camera_view(x, y)
     (@camera.x + (Main::SCREEN_X / Main::TILE_SIZE) <= x) and
       (@camera.y + (Main::SCREEN_X / Main::TILE_SIZE) <= y)
@@ -195,6 +221,28 @@ class Tile
   LIGHT_GRASS = 1
   DEAD_TREE_TRUNK_1 = 2
   DEAD_TREE_TRUNK_0 = 3
+
+  TILES = {
+    0 => :dark_grass,
+    1 => :light_grass,
+    3 => :dead_tree_trunk_0,
+    2 => :dead_tree_trunk_1
+  }
+
+  attr_accessor :image, :depleted, :type
+
+  def initialize(window, image_name, x, y, w, h, type)
+    @type = type
+    @depleted = false
+    @image = Gosu::Image.new(window, image_name, true, x, y, w, h)
+  end
+
+  def depleted?; @depleted; end
+
+  def draw(x, y)
+    @image.draw(x, y, 0, 2, 2)
+  end
+
 end
 
 class Camera
@@ -206,9 +254,17 @@ class Camera
 end
 
 module Skill
-  def skill(skill)
+  def skill(skill, difficulty, bounds)
     case skill
-    when :tree_cut then puts "cutting tree"
+    when :tree_cut then
+      player_roll = Random.rand(1..20) + @tree_cut
+      if player_roll >= difficulty
+        tile = @board.fetch_by_coords(*bounds)
+        unless tile.depleted?
+          puts "you got 10 wood sticks [roll: #{player_roll}]"
+          tile.depleted = true
+        end
+      end
     end
   end
 end
@@ -217,8 +273,10 @@ class Player
   include Skill
   attr_accessor :x, :y, :poses
 
-  def initialize(x: 0, y: 0, coords_system: :tiles, window: nil) 
+  def initialize(x: 0, y: 0, coords_system: :tiles, window: nil, board: nil) 
+    @board = board
     @x, @y = [(Main::SCREEN_X / 2) - 32, (Main::SCREEN_Y / 2) - 32]
+    @tree_cut = 5
     @vel = 3
     @pos = 0
     @anim = 0
