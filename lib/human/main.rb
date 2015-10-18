@@ -1,3 +1,5 @@
+require 'byebug'
+
 class Main < Gosu::Window
 
   SCREEN_X = 1280

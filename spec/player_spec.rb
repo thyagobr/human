@@ -1,5 +1,3 @@
-require 'refocus'
-
 RSpec.describe Player do
 
   context "A new Player" do

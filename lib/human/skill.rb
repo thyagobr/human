@@ -12,12 +12,20 @@ module Skill
         end
       end
     when :make_fire then
+      puts "rolling make_fire roll..."
       player_roll = Random.rand(1..20) + @make_fire
+      puts "rolled a #{player_roll} against difficulty #{difficulty}"
       if player_roll >= difficulty
         wood_spent_per_try = 1
-        if item = @board.player.inventory.any? { |item| item.type == :wood }
-          # think this through...
+        index = @board.player.inventory.index { |item| item.type == :wood }
+        if index
+          item = @board.player.inventory.delete_at(index)
+          puts "fire success!"
+        else
+          puts "you don't have wood!"
         end
+      else
+        puts "fire failed! you wasted one wood trying. you have #{@board.player.inventory.size} left"
       end
     end
   end

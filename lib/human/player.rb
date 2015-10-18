@@ -1,5 +1,3 @@
-require 'skill'
-
 class Player
   include Skill
   attr_accessor :x, :y, :poses, :inventory
