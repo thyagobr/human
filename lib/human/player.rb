@@ -27,6 +27,7 @@ class Player
     @poses[@pos + @anim].draw(@x, @y, 1, 1.5, 1.5)
   end
 
+  # x, y in pixels
   def warp(x, y)
     @x, @y = x, y
   end

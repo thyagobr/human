@@ -14,6 +14,12 @@ RSpec.describe Player do
       expect(player.inventory).to include item
     end
 
+    it "#warp" do
+      player.warp(15, 15)
+      expect(player.pos).to eql [15, 15]
+    end
+
+
   end
 
 end

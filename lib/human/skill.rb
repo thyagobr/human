@@ -22,6 +22,7 @@ module Skill
           item = @board.player.inventory.delete_at(index)
           coord_x = @x
           coord_y = @y
+          # adjust fire coordinates to be on the side the player is facing
           case @facing
           when :up
             coord_y -= 32

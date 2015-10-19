@@ -1,6 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    byebug (6.0.2)
     coderay (1.1.0)
     diff-lcs (1.2.5)
     ffi (1.9.10)
@@ -60,6 +61,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  byebug
   gosu
   guard-rspec
   rspec

@@ -29,6 +29,8 @@ class Main < Gosu::Window
       end
     when Gosu::KbF
       @board.player.skill(:make_fire, 15)
+    when Gosu::KbT
+      @board.player.warp(Random.rand(0..1280), Random.rand(0..720))
     end
   end
 
