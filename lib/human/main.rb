@@ -7,7 +7,7 @@ class Main < Gosu::Window
   TILE_SIZE = 64
 
   def initialize
-    super(1280, 720, fullscreen = false)
+    super(SCREEN_X, SCREEN_Y, fullscreen = false)
     @board = Board.new(self)
   end
 
@@ -98,6 +98,9 @@ class Main < Gosu::Window
           @board.player.down(move: true) if @board.player.y <= SCREEN_Y - 64
         end
       end
+    end
+    if button_down? Gosu::KbEscape then
+      exit
     end
   end
 
